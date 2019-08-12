@@ -33,18 +33,20 @@ IDX.p2 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling Regions/In
 # IDX.17.p3 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/2013_2017_Supplement2.dta")
 # IDX.17=list(IDX.17.p1,IDX.17.p2,IDX.17.p3) %>% reduce(full_join, by = "FIPS")
 IDX.sup1 = readstata13::read.dta13('/Users/rorr/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/IncomeSupplement.dta')
-IDX.sup1=subset(IDX.sup1, select = -c(merge1,`_merge`))
+IDX.sup1=subset(IDX.sup1, select = -c(`_merge`))
 IDX.sup2 = readstata13::read.dta13('~/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/enrollmentdata.dta')
-IDX.sup3 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/professions.dta")
+
+IDX.sup_prof.1 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/professions_p1.dta")
+IDX.sup_prof.2 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/professions_p2.dta")
 
 IDX.labels_1 = attr(IDX.p1,"var.labels")
-# IDX.17.labels_2 = attr(IDX.12.p2,"var.labels")
-# IDX.17.labels_3 = attr(IDX.12.p3,"var.labels")
 IDX.labels_2 = attr(IDX.p2,"var.labels")
-# IDX.17.labels_2 = attr(IDX.17.p2,"var.labels")
-# IDX.17.labels_3 = attr(IDX.17.p3,"var.labels")
+
+IDX.sup1.labels = attr(IDX.sup1,"var.labels")
 IDX.sup2.labels = attr(IDX.sup2,"var.labels")
-IDX.sup3.labels = attr(IDX.sup3,"var.labels")
+
+IDX.prof.1.labels = attr(IDX.sup_prof.1,"var.labels")
+IDX.prof.2.labels = attr(IDX.sup_prof.2,"var.labels")
 
 IDX.p1$Year = 2012
 IDX.p2$Year = 2017
@@ -62,11 +64,14 @@ IDX.p2$Year = 2017
 
 IDX1_vars=cbind(var.label=IDX.labels_1,var.name=names(IDX.p1))
 IDX2_vars=cbind(var.label_p2=IDX.labels_2,var.name=names(IDX.p2))
-IDXsup_vars=cbind(var.label=IDX.sup2,var.name=names(IDX.sup2))
+IDXsup.1_vars=cbind(var.label=IDX.sup1.labels,var.name=names(IDX.sup1))
+IDXsup.2_vars=cbind(var.label=IDX.sup2.labels,var.name=names(IDX.sup2))
+IDXsup.3_vars=cbind(var.label=IDX.sup3.labels,var.name=names(IDX.sup3))
 
 IDX.labels=merge(IDX1_vars,IDX2_vars, by = 'var.name', all = T, sort = F)
 # openxlsx::write.xlsx(IDX.labels,'~/Downloads/IDX.labels.xlsx')
 IDX.labels$var.label_p2=NULL
+IDX.sup.labels=merge(IDX1_vars,IDX2_vars, by = 'var.name', all = T, sort = F)
 
 IDX.dat=rbind(IDX.p1,IDX.p2)
 IDX.dat$St_Code=stringi::stri_sub(IDX.dat$FIPS, from=1, to=2)
@@ -92,6 +97,23 @@ HUD.IDX$FIPS= ifelse(HUD.IDX$FIPS == "51515050100", "51019050100",
        ifelse(HUD.IDX$FIPS == "46113940800", "46102940800",
        ifelse(HUD.IDX$FIPS == "46113940900", "46102940900",HUD.IDX$FIPS)))))
 
+IDX.sup1$FIPS= ifelse(IDX.sup1$FIPS == "51515050100", "51019050100",
+       ifelse(IDX.sup1$FIPS == "02270000100", "02158000100",
+       ifelse(IDX.sup1$FIPS == "46113940500", "46102940500",
+       ifelse(IDX.sup1$FIPS == "46113940800", "46102940800",
+       ifelse(IDX.sup1$FIPS == "46113940900", "46102940900",IDX.sup1$FIPS)))))
+
+IDX.sup2$FIPS= ifelse(IDX.sup2$FIPS == "51515050100", "51019050100",
+       ifelse(IDX.sup2$FIPS == "02270000100", "02158000100",
+       ifelse(IDX.sup2$FIPS == "46113940500", "46102940500",
+       ifelse(IDX.sup2$FIPS == "46113940800", "46102940800",
+       ifelse(IDX.sup2$FIPS == "46113940900", "46102940900",IDX.sup2$FIPS)))))
+
+IDX.sup3$FIPS= ifelse(IDX.sup3$FIPS == "51515050100", "51019050100",
+       ifelse(IDX.sup3$FIPS == "02270000100", "02158000100",
+       ifelse(IDX.sup3$FIPS == "46113940500", "46102940500",
+       ifelse(IDX.sup3$FIPS == "46113940800", "46102940800",
+       ifelse(IDX.sup3$FIPS == "46113940900", "46102940900",IDX.sup3$FIPS)))))
 
 IDX.dat=merge(OZ_dat,IDX.dat, by = 'FIPS', all.y = T, sort = F)
 
@@ -110,9 +132,7 @@ IDX.dat[pct_vars] =  IDX.dat[pct_vars] * 100
 IDX.dat$pov_100 = (IDX.dat$PCT_C17002002+IDX.dat$PCT_C17002003+IDX.dat$PCT_C17002004)
 IDX.dat$pov_200 = (IDX.dat$PCT_C17002002+IDX.dat$PCT_C17002003+IDX.dat$PCT_C17002004+IDX.dat$PCT_C17002005+IDX.dat$PCT_C17002006+IDX.dat$PCT_C17002007)
 
-
 IDX.dat=merge(IDX.dat,HUD.IDX, by = c('FIPS','Year'), all.x = T, sort = F)
-
 
 IDX.dat$EPOP=IDX.dat$EPOP *100
 IDX.dat$UnemploymentRate=IDX.dat$UnemploymentRate *100	#  Civillian unemployment rate
@@ -414,6 +434,8 @@ IDX.dat_sub = subset(IDX.dat, select = -c( # Remove GEO Vars
 		# ,PerCapitaIncome
 		# ,PovIntensity
 		,Year
+		,res_vac_prop
+		,bus_vac_prop
 ))
 # missings_IDX=as.data.frame(IDX.dat_sub) %>% summarise_all(funs(sum(is.na(.)))) %>% gather()
 # print(missings_IDX, n =50)
@@ -451,44 +473,12 @@ round(cor(IDX.matrix),2)
 corrplot(cor(IDX.matrix), order = "original", tl.col='black', tl.cex=.75) 
 colnames(IDX.matrix)
 
-#### Exploratory Factor Analysis #### 
-
-# https://www.statmethods.net/advstats/factor.html
-# https://www.r-bloggers.com/exploratory-factor-analysis-in-r/
-parallel <- fa.parallel(IDX.matrix, fm = 'minres', fa = 'fa')
-parallel <- fa.parallel(IDX_samp, fm = 'minres', fa = 'fa')
-
-onefactor_oblimin <- fa(IDX.matrix,nfactors = 1,rotate = "oblimin",fm="minres")
-print(onefactor_oblimin)
-
-onefactor_varimax <- fa(IDX.matrix,nfactors = 1,rotate = "varimax",fm="minres")
-print(onefactor_varimax)
-
-twofactor <- fa(IDX.matrix,nfactors = 2,rotate = "oblimin",fm="minres")
-print(twofactor)
-
-# threefactor <- fa(IDX.matrix,nfactors = 3,rotate = "varimax",fm="minres")
-# print(threefactor)
-# 
-# fourfactor <- fa(IDX.matrix,nfactors = 4,rotate = "oblimin",fm="minres")
-# print(fourfactor$loadings,cutoff = 0.3)
-
-glimpse(IDX.matrix)
-
-fit <- factanal(IDX.matrix, 2, rotation="varimax")
-print(fit, digits=2, cutoff=.3, sort=TRUE)
-# plot factor 1 by factor 2 
-load <- fit$loadings[,1:2] 
-plot(load,type="n") # set up plot 
-
-
 #### Confirmatory Factor Analysis #### 
 # https://quantdev.ssri.psu.edu/tutorials/intro-basic-confirmatory-factor-analysis
 # http://sachaepskamp.com/files/SEM12017/SEM1Week1.pdf
 # http://sachaepskamp.com/files/SEM12017/SEM1Week2.pdf
 
-
-#Model with 0 common factors 
+# Model with 0 common factors 
 OPI_0factor <- ' #start of model
 
 # latent variable definitions (common factors)
@@ -580,22 +570,24 @@ inspect(fit1,what="std")$lambda
 OPP_2factor <- ' #start of model
 
 # latent variable definitions (common factors)
-score =~ LaborMarket + HumanCapital
-	LaborMarket =~ EPOP2554 + UnemploymentRate + PerWorkerWageIncome
-	Mobility =~ PCT_B07204007 + VacancyRate + median_housing_age
+# Score =~ LaborMarket + Mobility
+	LaborMarket =~ EPOP2554 + UnemploymentRate + PerWorkerWageIncome + PCT_B07204007
+	Mobility =~ VacancyRate + median_housing_age
 	
 # latent variable variances
-  LaborMarket ~~ LaborMarket
-  Mobility ~~ Mobility
+  # Score ~~ Score
+  LaborMarket ~~ 1*LaborMarket
+  Mobility ~~ 1*Mobility
 
 # latent variable covariances
-  LaborMarket ~~ Mobility
+  # LaborMarket ~~ Mobility
 
 # latent variable means
+  LaborMarket ~~ 1*LaborMarket
+  Mobility ~~ 1*Mobility
 
 # manifest variable variances (uniquenesses)
   PerWorkerWageIncome ~~ PerWorkerWageIncome
-  AverageSchooling ~~ AverageSchooling
   UnemploymentRate ~~ UnemploymentRate
   EPOP2554 ~~ EPOP2554
   PCT_B07204007 ~~ PCT_B07204007 
@@ -603,22 +595,22 @@ score =~ LaborMarket + HumanCapital
   median_housing_age ~~ median_housing_age
 
 # manifest variable covariances (uniquenesses)
+
   UnemploymentRate ~~ PerWorkerWageIncome
   EPOP2554 ~~ PerWorkerWageIncome
-    
-  UnemploymentRate ~~ PerWorkerWageIncome
-  PCT_B07204007 ~~ median_housing_age
-  PCT_B07204007 ~~ VacancyRate
+  PCT_B07204007 ~~ UnemploymentRate
+  PCT_B07204007 ~~ PerWorkerWageIncome
+  PCT_B07204007 ~~ EPOP2554
+
   median_housing_age ~~ VacancyRate
 
 #manifest variable means 
-  PerWorkerWageIncome ~~ PerWorkerWageIncome 
-  AverageSchooling ~~ AverageSchooling 
-  UnemploymentRate ~~ UnemploymentRate 
-  EPOP2554 ~~ EPOP2554 
-  PCT_B07204007 ~~ PCT_B07204007 
-  VacancyRate ~~ VacancyRate 
-  median_housing_age ~~ median_housing_age 
+  PerWorkerWageIncome ~ 1 
+  UnemploymentRate ~ 1 
+  EPOP2554 ~ 1 
+  PCT_B07204007 ~ 1 
+  VacancyRate ~ 1 
+  median_housing_age ~ 1 
 ' #end of model
 
 fit2 <- lavaan(OPP_2factor, data=IDX.matrix, mimic = "mplus")
@@ -699,14 +691,18 @@ OPI_CFA <- ' #start of model
 		OPI =~ 
 		# B19013001 +         
 		# B25077001 +           # Owner-Occupied Housing Units: Median Value (Dollars)
+		# B25078001 +           # Owner-Occupied Housing Units: Upper Quintile Value (Dollars)
+		# B25076001 +           # Owner-Occupied Housing Units: Lower Quintile Value (Dollars)
+            # B25064001 +		# Renter-Occupied Housing Units Paying Cash Rent: Median Gross Rent
+
 		UnemploymentRate +   
 		VacancyRate +        
-		# PCT_C17002002 +      
-		# PCT_C17002003 +      
-		# PCT_C17002004 +      
-		# PCT_C17002005 +      
-		# PCT_C17002006 +      
-		# PCT_C17002007 +      
+		# PCT_C17002002 +      # Poverty Buckets
+		# PCT_C17002003 +      # Poverty Buckets
+		# PCT_C17002004 +      # Poverty Buckets
+		# PCT_C17002005 +      # Poverty Buckets
+		# PCT_C17002006 +      # Poverty Buckets
+		# PCT_C17002007 +      # Poverty Buckets
 		# AverageSchooling +   
 		# PCT_B07204007 +      
 		# Density +            
@@ -728,7 +724,7 @@ lambda_scores^2
 modindices(fit)
 
 var_insp=as.data.frame(IDX.matrix)
-var_insp$labor_index=(((var_insp$EPOP2554       *      0.671)+
+var_insp$labor_index=(((var_insp$EPOP2554       *     0.671)+
 			    (var_insp$UnemploymentRate *    0.713)+
 			    (var_insp$PerWorkerWageIncome * 0.553)))
 
@@ -747,3 +743,33 @@ glimpse(var_test)
 test_df=subset(var_test, select = c(FIPS,OZ,labor_index))
 openxlsx::write.xlsx(test_df, "~/Desktop/Welfare_Policy/Struggling Regions/Index/test_df.xlsx")
 
+
+#### Exploratory Factor Analysis #### #
+
+# https://www.statmethods.net/advstats/factor.html
+# https://www.r-bloggers.com/exploratory-factor-analysis-in-r/
+parallel <- fa.parallel(IDX.matrix, fm = 'minres', fa = 'fa')
+parallel <- fa.parallel(IDX_samp, fm = 'minres', fa = 'fa')
+
+onefactor_oblimin <- fa(IDX.matrix,nfactors = 1,rotate = "oblimin",fm="minres")
+print(onefactor_oblimin)
+
+onefactor_varimax <- fa(IDX.matrix,nfactors = 1,rotate = "varimax",fm="minres")
+print(onefactor_varimax)
+
+twofactor <- fa(IDX.matrix,nfactors = 2,rotate = "oblimin",fm="minres")
+print(twofactor)
+
+# threefactor <- fa(IDX.matrix,nfactors = 3,rotate = "varimax",fm="minres")
+# print(threefactor)
+# 
+# fourfactor <- fa(IDX.matrix,nfactors = 4,rotate = "oblimin",fm="minres")
+# print(fourfactor$loadings,cutoff = 0.3)
+
+glimpse(IDX.matrix)
+
+fit <- factanal(IDX.matrix, 2, rotation="varimax")
+print(fit, digits=2, cutoff=.3, sort=TRUE)
+# plot factor 1 by factor 2 
+load <- fit$loadings[,1:2] 
+plot(load,type="n") # set up plot 
