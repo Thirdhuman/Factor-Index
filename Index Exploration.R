@@ -34,8 +34,8 @@ IDX.p2 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling Regions/In
 # IDX.17=list(IDX.17.p1,IDX.17.p2,IDX.17.p3) %>% reduce(full_join, by = "FIPS")
 IDX.sup1 = readstata13::read.dta13('/Users/rorr/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/IncomeSupplement.dta')
 IDX.sup1=subset(IDX.sup1, select = -c(merge1,`_merge`))
-
-IDX.sup2 = readstata13::read.dta13('/Users/rorr/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/enrollmentdata.dta')
+IDX.sup2 = readstata13::read.dta13('~/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/enrollmentdata.dta')
+IDX.sup3 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling Regions/Index/Raw Data/professions.dta")
 
 IDX.labels_1 = attr(IDX.p1,"var.labels")
 # IDX.17.labels_2 = attr(IDX.12.p2,"var.labels")
@@ -44,6 +44,7 @@ IDX.labels_2 = attr(IDX.p2,"var.labels")
 # IDX.17.labels_2 = attr(IDX.17.p2,"var.labels")
 # IDX.17.labels_3 = attr(IDX.17.p3,"var.labels")
 IDX.sup2.labels = attr(IDX.sup2,"var.labels")
+IDX.sup3.labels = attr(IDX.sup3,"var.labels")
 
 IDX.p1$Year = 2012
 IDX.p2$Year = 2017
@@ -73,11 +74,11 @@ IDX.dat$admin_type=ifelse(as.numeric(IDX.dat$St_Code) <= 56, 1, 0)
 IDX.dat=subset(IDX.dat, IDX.dat$admin_type != 0, select = -c(admin_type,St_Code,`_merge`,merge1))
 IDX.dat=merge(IDX.dat,IDX.sup1, by = c('FIPS', "Year"), all.x = T, sort = F)
 
-OZ_dat$FIPS= ifelse(OZ_dat$FIPS == "51515050100", "51019050100",
-       ifelse(OZ_dat$FIPS == "02270000100", "02158000100",
-       ifelse(OZ_dat$FIPS == "46113940500", "46102940500",
-       ifelse(OZ_dat$FIPS == "46113940800", "46102940800",
-       ifelse(OZ_dat$FIPS == "46113940900", "46102940900",OZ_dat$FIPS)))))
+IDX.dat$FIPS= ifelse(IDX.dat$FIPS == "51515050100", "51019050100",
+       ifelse(IDX.dat$FIPS == "02270000100", "02158000100",
+       ifelse(IDX.dat$FIPS == "46113940500", "46102940500",
+       ifelse(IDX.dat$FIPS == "46113940800", "46102940800",
+       ifelse(IDX.dat$FIPS == "46113940900", "46102940900",IDX.dat$FIPS)))))
 
 OZ_dat$FIPS= ifelse(OZ_dat$FIPS == "51515050100", "51019050100",
        ifelse(OZ_dat$FIPS == "02270000100", "02158000100",
@@ -91,13 +92,8 @@ HUD.IDX$FIPS= ifelse(HUD.IDX$FIPS == "51515050100", "51019050100",
        ifelse(HUD.IDX$FIPS == "46113940800", "46102940800",
        ifelse(HUD.IDX$FIPS == "46113940900", "46102940900",HUD.IDX$FIPS)))))
 
-IDX.dat$FIPS= ifelse(IDX.dat$FIPS == "51515050100", "51019050100",
-       ifelse(IDX.dat$FIPS == "02270000100", "02158000100",
-       ifelse(IDX.dat$FIPS == "46113940500", "46102940500",
-       ifelse(IDX.dat$FIPS == "46113940800", "46102940800",
-       ifelse(IDX.dat$FIPS == "46113940900", "46102940900",IDX.dat$FIPS)))))
 
-IDX.dat=merge(IDX.dat,OZ_dat, by = 'FIPS', all.x = T, sort = F)
+IDX.dat=merge(OZ_dat,IDX.dat, by = 'FIPS', all.y = T, sort = F)
 
 IDX.dat$median_housing_age = (IDX.dat$Year - IDX.dat$B25035001)
 pct_vars <- grepl('PCT_', colnames(IDX.dat))
@@ -140,13 +136,13 @@ IDX.dat_names = IDX.dat[,1]
 # names(as.vector(IDX.dat))
 
 IDX.dat$PovIntensity = ((
-  IDX.dat$PCT_C17002002 * 4  #      Population for Whom Poverty Status Is Determined: Under .50
-+ IDX.dat$PCT_C17002003 * 3  #     Population for Whom Poverty Status Is Determined: .50 to .99
-+ IDX.dat$PCT_C17002004 * 2  #   Population for Whom Poverty Status Is Determined: 1.00 to 1.24
-+ IDX.dat$PCT_C17002005 * 1.6666  #   Population for Whom Poverty Status Is Determined: 1.25 to 1.49
-+ IDX.dat$PCT_C17002006 * 1.3333  #   Population for Whom Poverty Status Is Determined: 1.50 to 1.84
+  IDX.dat$PCT_C17002002 * 6  #      Population for Whom Poverty Status Is Determined: Under .50
++ IDX.dat$PCT_C17002003 * 5  #     Population for Whom Poverty Status Is Determined: .50 to .99
++ IDX.dat$PCT_C17002004 * 4  #   Population for Whom Poverty Status Is Determined: 1.00 to 1.24
++ IDX.dat$PCT_C17002005 * 3 # Population for Whom Poverty Status Is Determined: 1.25 to 1.49
++ IDX.dat$PCT_C17002006 * 2 # Population for Whom Poverty Status Is Determined: 1.50 to 1.84
 + IDX.dat$PCT_C17002007 * 1)  #   Population for Whom Poverty Status Is Determined: 1.85 to 1.99
-	/ 12) 
+	/ 21) 
 
 missing_oz=subset(IDX.dat,is.na(OZ))
 missing_oz$FIPS
@@ -242,7 +238,7 @@ IDX.dat_sub = subset(IDX.dat, select = -c( # Remove GEO Vars
             ,B25004006 #              Vacant Housing Units: for Seasonal, Recreational, or Occasional Use
             ,B25004007 #                                        Vacant Housing Units: for Migrant Workers
             ,B25004008 #                                               Vacant Housing Units: Other Vacant
-            ,B25064001 #                Renter-Occupied Housing Units Paying Cash Rent: Median Gross Rent
+            # ,B25064001 #                Renter-Occupied Housing Units Paying Cash Rent: Median Gross Rent
             ,B25071001 # Renter-Occupied Housing Units Paying Cash Rent: Median Gross Rent as a Percentag
             ,B25075001 #                                                     Owner-Occupied Housing Units
             ,B25075002 #                                  Owner-Occupied Housing Units: Less than $10,000
@@ -269,9 +265,9 @@ IDX.dat_sub = subset(IDX.dat, select = -c( # Remove GEO Vars
             ,B25075023 #                               Owner-Occupied Housing Units: $500,000 to $749,999
             ,B25075024 #                               Owner-Occupied Housing Units: $750,000 to $999,999
             ,B25075025 #                                 Owner-Occupied Housing Units: $1,000,000 or More
-            ,B25076001 #                     Owner-Occupied Housing Units: Lower Value Quartile (Dollars)
+            # ,B25076001 #                     Owner-Occupied Housing Units: Lower Value Quartile (Dollars)
             # ,B25077001 #                             Owner-Occupied Housing Units: Median Value (Dollars)
-            ,B25078001 #                     Owner-Occupied Housing Units: Upper Value Quartile (Dollars)
+            # ,B25078001 #                     Owner-Occupied Housing Units: Upper Value Quartile (Dollars)
             ,C17002001 #                                 Population for Whom Poverty Status Is Determined
             ,C17002002 #                      Population for Whom Poverty Status Is Determined: Under .50
             ,C17002003 #                     Population for Whom Poverty Status Is Determined: .50 to .99
@@ -442,9 +438,12 @@ IDX.dat_sub$PCT_C17002007=as.numeric(reverse.code(-1,IDX.dat_sub$PCT_C17002007))
 IDX.dat_sub=na.omit(IDX.dat_sub)
 glimpse(IDX.dat_sub)
 IDX.dat_sub=(as.data.frame(IDX.dat_sub))
+insp_names = IDX.dat_sub[,1:2]
+IDX.matrix = as.matrix(IDX.dat_sub[,-c(1:2)])
 
-IDX.matrix=subset(IDX.dat_sub, select = -c(FIPS,OZ))
+# IDX.matrix=subset(IDX.dat_sub, select = -c(FIPS,OZ))
 IDX.matrix=as.matrix(IDX.matrix)
+# IDX.matrix=scales::rescale(IDX.matrix,to=c(0,1))
 IDX.matrix=scale(IDX.matrix)
 
 # Correlation Matrix
@@ -468,11 +467,11 @@ print(onefactor_varimax)
 twofactor <- fa(IDX.matrix,nfactors = 2,rotate = "oblimin",fm="minres")
 print(twofactor)
 
-threefactor <- fa(IDX.matrix,nfactors = 3,rotate = "varimax",fm="minres")
-print(threefactor)
-
-fourfactor <- fa(IDX.matrix,nfactors = 4,rotate = "oblimin",fm="minres")
-print(fourfactor$loadings,cutoff = 0.3)
+# threefactor <- fa(IDX.matrix,nfactors = 3,rotate = "varimax",fm="minres")
+# print(threefactor)
+# 
+# fourfactor <- fa(IDX.matrix,nfactors = 4,rotate = "oblimin",fm="minres")
+# print(fourfactor$loadings,cutoff = 0.3)
 
 glimpse(IDX.matrix)
 
@@ -503,9 +502,7 @@ OPI_0factor <- ' #start of model
   EPOP2554 ~~ EPOP2554
 
 # manifest variable covariances (uniquenesses)
-  UnemploymentRate ~~ UnemploymentRate
-  PovIntensity ~~ PovIntensity
-  EPOP2554 ~~ EPOP2554
+  EPOP2554 ~~ PovIntensity
 
 #manifest variable means 
 
@@ -536,9 +533,8 @@ LBM_1factor <- ' #start of model
   EPOP2554 ~~ EPOP2554
 
 # manifest variable covariances (uniquenesses)
-  EPOP2554  ~~  UnemploymentRate
-  # PerWorkerWageIncome  ~~  UnemploymentRate
-  # EPOP2554  ~~  PerWorkerWageIncome
+  PerWorkerWageIncome  ~~  UnemploymentRate
+  PerWorkerWageIncome ~~ EPOP2554
 
 #manifest variable means 
 
@@ -556,7 +552,7 @@ HC_1factor <- ' #start of model
 
 # latent variable definitions (common factors)
 	HumanCapital =~ AverageSchooling +
-		PerWorkerWageIncome
+		B19013001
 
 # latent variable variances
   HumanCapital ~~ 1*HumanCapital
@@ -565,13 +561,11 @@ HC_1factor <- ' #start of model
 # latent variable means
 
 # manifest variable variances (uniquenesses)
-PerWorkerWageIncome ~~ PerWorkerWageIncome
 AverageSchooling ~~ AverageSchooling
 B19013001  ~~  B19013001
 
 # manifest variable covariances (uniquenesses)
-AverageSchooling ~~ PerWorkerWageIncome
-B19013001 ~~ PerWorkerWageIncome
+AverageSchooling ~~ B19013001
 
 #manifest variable means 
 ' #end of model
@@ -586,15 +580,69 @@ inspect(fit1,what="std")$lambda
 OPP_2factor <- ' #start of model
 
 # latent variable definitions (common factors)
-	LaborMarket =~ 1*EPOP2554 + UnemploymentRate 
-	HumanCapital =~ 1*AverageSchooling + PerWorkerWageIncome
+score =~ LaborMarket + HumanCapital
+	LaborMarket =~ EPOP2554 + UnemploymentRate + PerWorkerWageIncome
+	Mobility =~ PCT_B07204007 + VacancyRate + median_housing_age
+	
+# latent variable variances
+  LaborMarket ~~ LaborMarket
+  Mobility ~~ Mobility
+
+# latent variable covariances
+  LaborMarket ~~ Mobility
+
+# latent variable means
+
+# manifest variable variances (uniquenesses)
+  PerWorkerWageIncome ~~ PerWorkerWageIncome
+  AverageSchooling ~~ AverageSchooling
+  UnemploymentRate ~~ UnemploymentRate
+  EPOP2554 ~~ EPOP2554
+  PCT_B07204007 ~~ PCT_B07204007 
+  VacancyRate ~~ VacancyRate 
+  median_housing_age ~~ median_housing_age
+
+# manifest variable covariances (uniquenesses)
+  UnemploymentRate ~~ PerWorkerWageIncome
+  EPOP2554 ~~ PerWorkerWageIncome
+    
+  UnemploymentRate ~~ PerWorkerWageIncome
+  PCT_B07204007 ~~ median_housing_age
+  PCT_B07204007 ~~ VacancyRate
+  median_housing_age ~~ VacancyRate
+
+#manifest variable means 
+  PerWorkerWageIncome ~~ PerWorkerWageIncome 
+  AverageSchooling ~~ AverageSchooling 
+  UnemploymentRate ~~ UnemploymentRate 
+  EPOP2554 ~~ EPOP2554 
+  PCT_B07204007 ~~ PCT_B07204007 
+  VacancyRate ~~ VacancyRate 
+  median_housing_age ~~ median_housing_age 
+' #end of model
+
+fit2 <- lavaan(OPP_2factor, data=IDX.matrix, mimic = "mplus")
+summary(fit2, standardized=TRUE, fit.measures=TRUE)
+semPaths(fit2, what="std",  sizeLat = 7, sizeMan = 7, edge.label.cex = .75)
+inspect(fit2,what="std")$lambda
+
+#### 3-factor CFA Model ####
+OPP_3factor <- ' #start of model
+
+# latent variable definitions (common factors)
+score =~ LaborMarket + HumanCapital
+	LaborMarket =~ EPOP2554 + UnemploymentRate + PerWorkerWageIncome
+	HumanCapital =~ AverageSchooling + PerWorkerWageIncome
+	Mobility =~ PCT_B07204007 + VacancyRate + median_housing_age
 
 # latent variable variances
   LaborMarket ~~ LaborMarket
   HumanCapital ~~ HumanCapital
+  Mobility ~~ Mobility
 
 # latent variable covariances
   LaborMarket ~~ HumanCapital
+  LaborMarket ~~ Mobility
 
 # latent variable means
 
@@ -605,9 +653,12 @@ OPP_2factor <- ' #start of model
   EPOP2554 ~~ EPOP2554
 
 # manifest variable covariances (uniquenesses)
-  EPOP2554  ~~  UnemploymentRate
   AverageSchooling ~~ PerWorkerWageIncome
   EPOP2554 ~~ PerWorkerWageIncome
+  PCT_B07204007 
+  VacancyRate
+  median_housing_age
+
 
 #manifest variable means 
   PerWorkerWageIncome ~ 1
@@ -617,14 +668,13 @@ OPP_2factor <- ' #start of model
 
 ' #end of model
 
-fit2 <- lavaan(OPP_2factor, data=IDX.matrix, mimic = "mplus")
-summary(fit2, standardized=TRUE, fit.measures=TRUE)
-semPaths(fit2, what="std",  sizeLat = 7, sizeMan = 7, edge.label.cex = .75)
-inspect(fit2,what="std")$lambda
-inspect(fit2,what = "std")$beta
-
+fit3 <- lavaan(OPP_3factor, data=IDX.matrix, mimic = "mplus")
+summary(fit3, standardized=TRUE, fit.measures=TRUE)
+semPaths(fit3, what="std",  sizeLat = 7, sizeMan = 7, edge.label.cex = .75)
+inspect(fit3,what="std")$lambda
 
 OPI_CFA <- ' #start of model
+# Score =~LaborMarket+HumanCapital
 	LaborMarket =~ EPOP2554 +
 		UnemploymentRate 
 	HumanCapital =~ AverageSchooling +
@@ -634,31 +684,66 @@ OPI_CFA <- ' #start of model
 OPI_CFA <- ' #start of model
 	LaborMarket =~ EPOP2554 +
 		UnemploymentRate +
-	AverageSchooling +
 		PerWorkerWageIncome
 ' #end of model
 
 OPI_CFA <- ' #start of model
-	LaborMarket =~ EPOP2554 +
+		LaborMarket =~ EPOP2554 +
 		UnemploymentRate +
 		PerWorkerWageIncome +
 		B19013001 
 ' #end of model
 
+colnames(IDX.matrix)
+OPI_CFA <- ' #start of model
+		OPI =~ 
+		# B19013001 +         
+		# B25077001 +           # Owner-Occupied Housing Units: Median Value (Dollars)
+		UnemploymentRate +   
+		VacancyRate +        
+		# PCT_C17002002 +      
+		# PCT_C17002003 +      
+		# PCT_C17002004 +      
+		# PCT_C17002005 +      
+		# PCT_C17002006 +      
+		# PCT_C17002007 +      
+		# AverageSchooling +   
+		# PCT_B07204007 +      
+		# Density +            
+		# PerCapitaIncome +    
+		# PerWorkerWageIncome +
+		# median_housing_age + 
+		pov_100 +            
+		# pov_200 +            
+		# PovIntensity +                
+		EPOP2554          
+ #end of model'
 
 fit <- cfa(OPI_CFA, IDX.matrix)
 summary(fit, standardized=TRUE, fit.measures=TRUE)
 semPaths(fit, what="std",  sizeLat = 7, sizeMan = 7, edge.label.cex = .75)
+lambda_scores=inspect(fit,what="std")$lambda
+lambda_scores^2
 
-inspect(fit,what="std")$lambda
-inspect(fit,what = "std")$beta
 modindices(fit)
 
-var_insp=as.data.frame(IDX.dat_sub)
-glimpse(var_insp)
+var_insp=as.data.frame(IDX.matrix)
+var_insp$labor_index=(((var_insp$EPOP2554       *      0.671)+
+			    (var_insp$UnemploymentRate *    0.713)+
+			    (var_insp$PerWorkerWageIncome * 0.553)))
 
-var_insp$labor_index=((var_insp$EPOP2554       *      0.639)+
-				(var_insp$UnemploymentRate *    0.749)+
-				(var_insp$PerWorkerWageIncome * 0.482))*3
+var_insp$labor_index=(
+			    (var_insp$EPOP2554       *      0.639)+
+			    (var_insp$UnemploymentRate *    0.724)+
+			    (var_insp$pov_100 * 0.482) +
+			    (var_insp$VacancyRate * 0.368) * 100)
 
+var_insp=as.matrix(var_insp)
+# var_insp['labor_index']=scales::rescale(var_insp['labor_index'],to=c(0,1))
+var_insp=as.data.frame(var_insp)
+var_test=cbind(insp_names,var_insp)
+glimpse(var_test)
+
+test_df=subset(var_test, select = c(FIPS,OZ,labor_index))
+openxlsx::write.xlsx(test_df, "~/Desktop/Welfare_Policy/Struggling Regions/Index/test_df.xlsx")
 
