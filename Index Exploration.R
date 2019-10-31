@@ -70,44 +70,6 @@ IDX.sup2 = readstata13::read.dta13('~/Desktop/Welfare_Policy/Struggling_Regions/
 IDX.sup_prof.1 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling_Regions/Index/Raw Data/professions_p1.dta")
 IDX.sup_prof.2 = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling_Regions/Index/Raw Data/professions_p2.dta")
 
-IDX.labels_1 = attr(IDX.p1,"var.labels")
-IDX.labels_2 = attr(IDX.p2,"var.labels")
-
-IDX.sup1.labels = attr(IDX.sup1,"var.labels")
-IDX.sup2.labels = attr(IDX.sup2,"var.labels")
-
-IDX.prof.1.labels = attr(IDX.sup_prof.1,"var.labels")
-IDX.prof.2.labels = attr(IDX.sup_prof.2,"var.labels")
-
-IDX.p1$Year = 2012
-IDX.p2$Year = 2017
-
-# IDX.labels_1=append(IDX.labels_1, "Year")
-# IDX.labels_2=append(IDX.labels_2, "Year")
-
-# names(IDX.p1);names(IDX.p2)
-# glimpse(IDX.p1);glimpse(IDX.p2)
-
-# setdiff(names(IDX.p1), names(IDX.p2))
-# setdiff(names(IDX.p2), names(IDX.p1))
-# setdiff((IDX.labels_1), (IDX.labels_2))
-# setdiff((IDX.labels_2), (IDX.labels_1))
-
-IDX1_vars=cbind(var.label=IDX.labels_1,var.name=names(IDX.p1))
-IDX2_vars=cbind(var.label_p2=IDX.labels_2,var.name=names(IDX.p2))
-IDXsup.1_vars=cbind(var.label=IDX.sup1.labels,var.name=names(IDX.sup1))
-IDXsup.2_vars=cbind(var.label=IDX.sup2.labels,var.name=names(IDX.sup2))
-
-IDX.labels=merge(IDX1_vars,IDX2_vars, by = 'var.name', all = T, sort = F)
-# openxlsx::write.xlsx(IDX.labels,'~/Downloads/IDX.labels.xlsx')
-IDX.labels$var.label_p2=NULL
-IDX.sup.labels=merge(IDX1_vars,IDX2_vars, by = 'var.name', all = T, sort = F)
-
-IDX.dat=rbind(IDX.p1,IDX.p2)
-IDX.dat$St_Code=stringi::stri_sub(IDX.dat$FIPS, from=1, to=2)
-IDX.dat$admin_type=ifelse(as.numeric(IDX.dat$St_Code) <= 56, 1, 0) 
-IDX.dat=subset(IDX.dat, IDX.dat$admin_type != 0, select = -c(admin_type,St_Code,`_merge`,merge1))
-IDX.dat=merge(IDX.dat,IDX.sup1, by = c('FIPS', "Year"), all = T, sort = F)
 
 HUD.IDX$FIPS= ifelse(
 	        HUD.IDX$FIPS == "51515050100", "51019050100",
@@ -274,7 +236,45 @@ IDX.sup3$FIPS= ifelse(
 	ifelse(IDX.sup3$FIPS ==  "36065940100", "36065024700",
 	ifelse(IDX.sup3$FIPS ==  "36065940200", "36065024900", IDX.sup3$FIPS)))))))))))))))))))))))))
 
+IDX.labels_1 = attr(IDX.p1,"var.labels")
+IDX.labels_2 = attr(IDX.p2,"var.labels")
 
+IDX.sup1.labels = attr(IDX.sup1,"var.labels")
+IDX.sup2.labels = attr(IDX.sup2,"var.labels")
+
+IDX.prof.1.labels = attr(IDX.sup_prof.1,"var.labels")
+IDX.prof.2.labels = attr(IDX.sup_prof.2,"var.labels")
+
+IDX.p1$Year = 2012
+IDX.p2$Year = 2017
+
+# IDX.labels_1=append(IDX.labels_1, "Year")
+# IDX.labels_2=append(IDX.labels_2, "Year")
+
+# names(IDX.p1);names(IDX.p2)
+# glimpse(IDX.p1);glimpse(IDX.p2)
+
+# setdiff(names(IDX.p1), names(IDX.p2))
+# setdiff(names(IDX.p2), names(IDX.p1))
+# setdiff((IDX.labels_1), (IDX.labels_2))
+# setdiff((IDX.labels_2), (IDX.labels_1))
+
+IDX1_vars=cbind(var.label=IDX.labels_1,var.name=names(IDX.p1))
+IDX2_vars=cbind(var.label_p2=IDX.labels_2,var.name=names(IDX.p2))
+IDXsup.1_vars=cbind(var.label=IDX.sup1.labels,var.name=names(IDX.sup1))
+IDXsup.2_vars=cbind(var.label=IDX.sup2.labels,var.name=names(IDX.sup2))
+
+IDX.labels=merge(IDX1_vars,IDX2_vars, by = 'var.name', all = T, sort = F)
+# openxlsx::write.xlsx(IDX.labels,'~/Downloads/IDX.labels.xlsx')
+IDX.labels$var.label_p2=NULL
+IDX.sup.labels=merge(IDX1_vars,IDX2_vars, by = 'var.name', all = T, sort = F)
+
+IDX.dat=rbind(IDX.p1,IDX.p2)
+IDX.dat$St_Code=stringi::stri_sub(IDX.dat$FIPS, from=1, to=2)
+IDX.dat$admin_type=ifelse(as.numeric(IDX.dat$St_Code) <= 56, 1, 0) 
+IDX.dat=subset(IDX.dat, IDX.dat$admin_type != 0, select = -c(admin_type,St_Code,`_merge`,merge1))
+
+IDX.dat=merge(IDX.dat,IDX.sup1, by = c('FIPS', "Year"), all = T, sort = F)
 IDX.dat=merge(OZ_dat,IDX.dat, by = 'FIPS', all = T, sort = F)
 
 IDX.dat$median_housing_age = (IDX.dat$Year - IDX.dat$B25035001)
