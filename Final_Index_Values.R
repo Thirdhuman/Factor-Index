@@ -17,7 +17,7 @@ rm(list=ls());gc()
 
 index_calcs=readxl::read_excel("~/Desktop/Welfare_Policy/Struggling_Regions/Index/test_index_df.xlsx")
 # incarceration_calcs = readstata13::read.dta13("~/Desktop/Welfare_Policy/Struggling_Regions/Index/Additional Data/Index_Data/Incarceration/tract_outcomes_simple.dta")
-
+any(duplicated(index_calcs$FIPS))
 afford.idx=readxl::read_excel("~/Desktop/Welfare_Policy/Struggling_Regions/Index/Additional Data/Index_Data/Development/Housing_Affordability_MedianFamily.xlsx")
 afford.idx=as.data.frame(afford.idx)
 names(afford.idx)[names(afford.idx) == 'Census Tract'] = 'FIPS'
@@ -26,6 +26,7 @@ glimpse(afford.idx)
 afford.idx$afford.idx=as.numeric(afford.idx$afford.idx)
 glimpse(afford.idx)
 afford.idx=afford.idx[c("FIPS", 'afford.idx')]
+
 
 afford.idx$FIPS= ifelse(
 		 afford.idx$FIPS == "51515050100", "51019050100",
@@ -56,6 +57,12 @@ afford.idx$FIPS= ifelse(
 
 
 mig.idx=read.csv("~/Desktop/Welfare_Policy/Struggling_Regions/Index/Additional Data/Index_Data/Migration/Mobility_2017.csv")
+
+dups1=afford.idx[duplicated(afford.idx)|duplicated(afford.idx, fromLast=TRUE),]
+afford.idx=subset(afford.idx, is.na(FIPS)==F)
+dups2=afford.idx[duplicated(index_calcs)|duplicated(index_calcs, fromLast=TRUE),]
+dups3=afford.idx[duplicated(mig.idx)|duplicated(mig.idx, fromLast=TRUE),]
+
 mig.idx=as.data.frame(mig.idx)
 mig.idx$Geo_FIPS=str_pad(mig.idx$Geo_FIPS, 11, pad = "0")
 mig.idx=mig.idx[c("Geo_FIPS", 'PCT_ACS17_5yr_B07204009')]
